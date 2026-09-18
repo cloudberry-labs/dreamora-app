@@ -1,7 +1,8 @@
 {
   "private": true,
+  "type": "module",
   "dependencies": {
-    "@vercel/blob": "latest",
-    "firebase-admin": "latest"
+    "@vercel/blob": "^2.4.0",
+    "firebase-admin": "^13.0.0"
   }
 }
