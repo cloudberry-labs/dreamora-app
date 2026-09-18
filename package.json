@@ -1,6 +1,6 @@
 {
   "private": true,
-  "description": "Dreamora vision board app",
+  "description": "Dreamora — dreamy digital vision board",
   "type": "module",
   "dependencies": {
     "@vercel/blob": "^2.4.0",
