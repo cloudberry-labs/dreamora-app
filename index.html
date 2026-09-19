@@ -25,7 +25,7 @@ h1{font:400 clamp(46px,15vw,76px)/.9 "Darumadrop One",sans-serif;margin:9px 0 7p
 .section-title:after{content:"";height:2px;flex:1;background:repeating-linear-gradient(90deg,var(--pink) 0 8px,transparent 8px 13px)}
 .board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px 13px;padding:4px 3px 18px;align-items:start}
 .dream{margin:0;padding-top:8px;width:100%;min-width:0;position:relative;transform:rotate(var(--r));animation:arrive .55s both;animation-delay:var(--d)}
-.polaroid{background:var(--paper);padding:8px 8px 12px;border:1px solid rgba(86,81,105,.1);box-shadow:0 7px 15px rgba(73,59,73,.13);transition:.22s ease;cursor:pointer;position:relative}
+.polaroid{content-visibility:auto;contain-intrinsic-size:360px;background:var(--paper);padding:8px 8px 12px;border:1px solid rgba(86,81,105,.1);box-shadow:0 7px 15px rgba(73,59,73,.13);transition:.22s ease;cursor:pointer;position:relative}
 .polaroid:active,.polaroid.open{transform:translateY(-5px) scale(1.025);box-shadow:0 13px 23px rgba(73,59,73,.19);z-index:3}
 .photo{display:block;width:100%;height:auto;object-fit:contain;background:#eee}
 .caption{font:600 20px/1.05 Caveat,cursive;text-align:center;margin-top:8px}
@@ -97,7 +97,7 @@ function addPublicDream(d,i,target=board,isManifested=false){
   const card=document.createElement('div');
   card.className=d.photoUrl?'polaroid':'dream-note';
   if(!d.photoUrl)card.style.setProperty('--sticky',i%4===0?'#dfead8':i%4===1?'#eee5fa':i%4===2?'#f9dfd0':'#f8eebd');
-  if(d.photoUrl){const img=document.createElement('img');img.className='photo';img.src=d.photoUrl;img.alt=d.title||'Dream';card.appendChild(img)}
+  if(d.photoUrl){const img=document.createElement('img');img.className='photo';img.src=d.photoUrl;img.loading='lazy';img.decoding='async';img.alt=d.title||'Dream';card.appendChild(img)}
   const title=document.createElement('div');title.className='caption';title.textContent=d.title||'Untitled dream';card.appendChild(title);
   if(d.caption){const note=document.createElement('div');note.className='note';note.textContent=d.caption;card.appendChild(note)}
   if(d.story){const story=document.createElement('div');story.className='story';story.textContent=d.story;card.appendChild(story)}
