@@ -127,10 +127,11 @@ async function loadPublicTodos(ownerUid){
 }
 async function initDreamoraBoard(){
   try{
-    const snap=await db.collection('publicDreams').get();
+    const params=new URLSearchParams(location.search);const requestedOwner=(params.get('board')||'').trim();
+    const snap=requestedOwner?await db.collection('publicDreams').where('ownerUid','==',requestedOwner).get():await db.collection('publicDreams').get();
     const all=[...snap.docs].sort((a,b)=>{const ad=a.data(),bd=b.data();if(Number.isFinite(ad.order)||Number.isFinite(bd.order))return (ad.order??9999)-(bd.order??9999);return (ad.createdAt?.toMillis?.()||0)-(bd.createdAt?.toMillis?.()||0)});
     const active=all.filter(doc=>(doc.data().status||'manifesting')==='manifesting'),done=all.filter(doc=>doc.data().status==='manifested');
-    const ownerUid=all.find(doc=>doc.data().ownerUid)?.data().ownerUid||'';
+    const ownerUid=requestedOwner||all.find(doc=>doc.data().ownerUid)?.data().ownerUid||'';
     if(ownerUid){
       await loadPublicStyle(ownerUid);
       const aboveFold=active.slice(0,3).map(doc=>doc.data().photoUrl).filter(Boolean);
