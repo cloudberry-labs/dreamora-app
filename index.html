@@ -87,7 +87,7 @@ function renderPublicTodos(docs){
 }
 async function loadPublicTodos(ownerUid){
   if(!ownerUid)return;
-  try{const snap=await db.collection('users').doc(ownerUid).collection('todos').orderBy('createdAt','desc').get();renderPublicTodos([...snap.docs])}
+  try{const snap=await db.collection('publicTodos').where('ownerUid','==',ownerUid).get();const docs=[...snap.docs].sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));renderPublicTodos(docs)}
   catch(e){console.warn('Could not load Dream To-Do on public board',e)}
 }
 db.collection('publicDreams').get().then(snap=>{
