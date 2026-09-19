@@ -42,10 +42,19 @@ saveBtn.onclick=async()=>{
     const story=document.getElementById('dreamStory').value.trim();
     if(!title)throw new Error('Add a dream title first ♡');
     uploadStatus.textContent='Saving your dream to your board ✨';
-    await db.collection('users').doc(user.uid).collection('dreams').add({
+    const dreamRef=db.collection('users').doc(user.uid).collection('dreams').doc();
+    const dreamData={
       title,caption,story,photoUrl,pathname:signed.pathname,status:'manifesting',
       createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
+    };
+    const publicData={
+      ownerUid:user.uid,title,caption,story,photoUrl,status:'manifesting',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp()
+    };
+    const batch=db.batch();
+    batch.set(dreamRef,dreamData);
+    batch.set(db.collection('publicDreams').doc(dreamRef.id),publicData);
+    await batch.commit();
     uploadStatus.textContent='Pinned to your Dreamora Studio ♡';
     const row=document.createElement('div');row.className='dream-row';
     row.innerHTML='<img src="'+photoUrl.replace(/"/g,'&quot;')+'" alt=""><div><h4></h4><p>Manifesting'+(story?' • has story':'')+'</p></div><button class="dots">•••</button>';
