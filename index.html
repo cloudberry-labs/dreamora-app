@@ -48,7 +48,7 @@ body.theme-clouds{--paper:#fbfdff;--sticky:#e8e6fb;--pin:#9bd8f7;background:radi
 body.theme-vintage{--paper:#fffaf0;--sticky:#ead8bd;--pin:#c9a77a;background:radial-gradient(circle at 15% 8%,#ead9bd 0,transparent 28%),radial-gradient(circle at 85% 20%,#f5e8cf 0,transparent 30%),radial-gradient(#d8c8ae 1px,transparent 1px),#f7efdf}
 body.theme-cottage{--paper:#fffdf5;--sticky:#dfead8;--pin:#b8cfb1;background:radial-gradient(circle at 12% 8%,#dcebd5 0,transparent 28%),radial-gradient(circle at 88% 18%,#f7e2d8 0,transparent 28%),radial-gradient(circle at 55% 62%,#fff0d6 0,transparent 25%),radial-gradient(#d5dccb 1px,transparent 1px),#fbf8ed}
 body.theme-night{--ink:#f7f1ff;--paper:#5d587d;--sticky:#8079a7;--pin:#eaa1bf;color:#f7f1ff;background:radial-gradient(circle at 12% 8%,#7d739d 0,transparent 28%),radial-gradient(circle at 88% 18%,#8c6f91 0,transparent 28%),radial-gradient(circle at 55% 62%,#514d70 0,transparent 25%),radial-gradient(#ffffff20 1px,transparent 1px),#3f3b59}
-body.theme-night{color:#f7f1ff}body.theme-night .polaroid,body.theme-night .paper-card,body.theme-night .dream-note{color:#565169}body.theme-night .photo{background:#514d70}body.theme-night .kicker{color:#565169}body.theme-night .stamp{background:#5d587ddd;color:#ffd9ec;border-color:#ffd9ec}body.theme-night .section-title:after{opacity:.7}body.theme-night .paper-card.surface-dark,body.theme-night .polaroid.surface-dark,body.theme-night .dream-note.surface-dark{color:#f7f1ff}
+body.theme-night{color:#f7f1ff}body.theme-night .photo{background:#514d70}body.theme-night .kicker{color:#565169}body.theme-night .stamp{background:#5d587ddd;color:#ffd9ec;border-color:#ffd9ec}body.theme-night .section-title:after{opacity:.7}.surface-light{color:#565169!important}.surface-dark{color:#f7f1ff!important}.surface-dark .story{color:#f7f1ff}.surface-light .story{color:#6a6478}
 body.theme-cream{--paper:#fffdf8;--sticky:#f5eee4;--pin:#d7c4ae;background:radial-gradient(circle at 12% 8%,#f4eadc 0,transparent 26%),radial-gradient(circle at 88% 18%,#fffaf0 0,transparent 28%),radial-gradient(#ddd4c8 1px,transparent 1px),#fffaf2}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -81,12 +81,15 @@ function applyPublicStyle(style={}){
   document.body.classList.add('theme-'+(style.theme||'pink'));document.getElementById('publicTodoCard')?.classList.toggle('dark-paper',(style.theme||'pink')==='night');
   if((style.paper||'dots')==='plain'){document.body.classList.add('paper-plain')}else{document.body.style.backgroundSize='auto,auto,auto,18px 18px'}
   if((style.font||'cute')==='clean')document.body.classList.add('style-clean');
+  requestAnimationFrame(refreshSurfaceContrast);
 }
 async function loadPublicStyle(ownerUid){
   if(!ownerUid)return;
   try{const d=await db.collection('publicStyles').doc(ownerUid).get();if(d.exists)applyPublicStyle(d.data())}
   catch(e){console.warn('Could not load Dreamora public style',e)}
 }
+function getSurfaceColor(el){const bg=getComputedStyle(el).backgroundColor;const m=bg.match(/[\d.]+/g);if(!m||m.length<3)return;const r=+m[0],g=+m[1],b=+m[2],a=m.length>3?+m[3]:1;if(a===0)return;const lum=(0.2126*r+0.7152*g+0.0722*b)/255;el.classList.toggle('surface-dark',lum<.52);el.classList.toggle('surface-light',lum>=.52)}
+function refreshSurfaceContrast(){document.querySelectorAll('.polaroid,.paper-card,.dream-note,.sticky').forEach(getSurfaceColor)}
 function dreamoraToggleKey(kind,key){return 'dreamora_'+kind+'_'+key}
 function bindLocalChecks(){
  document.querySelectorAll('#publicTodoList .check').forEach((row,i)=>{const box=row.querySelector('.box');if(!box)return;const key=dreamoraToggleKey('todo',row.dataset.id||i);if(localStorage.getItem(key)==='1')row.classList.add('done');box.onclick=()=>{row.classList.toggle('done');localStorage.setItem(key,row.classList.contains('done')?'1':'0')}});
@@ -105,7 +108,7 @@ function addPublicDream(d,i,target=board,isManifested=false){
   if(d.story){const story=document.createElement('div');story.className='story';story.textContent=d.story;card.appendChild(story)}
   if(d.photoUrl)card.addEventListener('click',()=>card.classList.toggle('open'));
   if(isManifested){const stamp=document.createElement('span');stamp.className='stamp';stamp.textContent='Manifested ♡';card.appendChild(stamp);if(d.manifestedAt?.toDate){const date=document.createElement('div');date.className='note';date.textContent=d.manifestedAt.toDate().toLocaleDateString(undefined,{month:'long',year:'numeric'});card.appendChild(date)}}
-  article.append(tape,card);target.appendChild(article);
+  article.append(tape,card);target.appendChild(article);getSurfaceColor(card);
 }
 function renderPublicTodos(docs){
   const box=document.getElementById('publicTodoList');if(!box)return;
@@ -137,7 +140,8 @@ async function initDreamoraBoard(){
     done.forEach((doc,i)=>addPublicDream(doc.data(),i,manifestedBoard,true));
     manifestedCount.textContent='✨ '+done.length+' dream'+(done.length===1?'':'s')+' manifested';
     if(!done.length)manifestedCount.style.opacity='.55';
-    if(ownerUid){loadPublicTodos(ownerUid);loadPublicTools(ownerUid)}
+    if(ownerUid){await Promise.all([loadPublicTodos(ownerUid),loadPublicTools(ownerUid)])}
+    refreshSurfaceContrast();
     console.log('Dreamora public dreams loaded:',active.length,'manifesting /',done.length,'manifested');
   }catch(err){
     console.error('Could not load Dreamora board',err);
