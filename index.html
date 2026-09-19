@@ -23,8 +23,8 @@ h1{font:400 clamp(46px,15vw,76px)/.9 "Darumadrop One",sans-serif;margin:9px 0 7p
 .tagline{font:600 14px/1.4 Quicksand,sans-serif;letter-spacing:.08em}
 .section-title{font:400 31px/1 "Darumadrop One";margin:26px 3px 20px;display:flex;align-items:center;gap:9px}
 .section-title:after{content:"";height:2px;flex:1;background:repeating-linear-gradient(90deg,var(--pink) 0 8px,transparent 8px 13px)}
-.board{columns:2;column-gap:13px;padding:4px 3px 18px}
-.dream{break-inside:avoid;page-break-inside:avoid;-webkit-column-break-inside:avoid;margin:0 0 17px;padding-top:8px;display:inline-block;width:100%;position:relative;transform:rotate(var(--r));animation:arrive .55s both;animation-delay:var(--d)}
+.board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:17px 13px;padding:4px 3px 18px;align-items:start}
+.dream{margin:0;padding-top:8px;width:100%;min-width:0;position:relative;transform:rotate(var(--r));animation:arrive .55s both;animation-delay:var(--d)}
 .polaroid{background:var(--paper);padding:8px 8px 12px;border:1px solid rgba(86,81,105,.1);box-shadow:0 7px 15px rgba(73,59,73,.13);transition:.22s ease;cursor:pointer;position:relative}
 .polaroid:active,.polaroid.open{transform:translateY(-5px) scale(1.025);box-shadow:0 13px 23px rgba(73,59,73,.19);z-index:3}
 .photo{display:block;width:100%;height:auto;object-fit:contain;background:#eee}
@@ -39,7 +39,7 @@ h1{font:400 clamp(46px,15vw,76px)/.9 "Darumadrop One",sans-serif;margin:9px 0 7p
 .count{text-align:center;margin:24px auto 0;font:600 20px Caveat,cursive;background:#fff8;border:1px dashed #d7c8d0;border-radius:999px;padding:8px 16px;width:max-content;max-width:100%}
 footer{text-align:center;font-size:10px;opacity:.55;margin-top:28px}
 @keyframes arrive{from{opacity:0;transform:translateY(12px) rotate(var(--r))}to{opacity:1;transform:translateY(0) rotate(var(--r))}}
-@media(min-width:600px){.board{columns:3}.planner-grid{grid-template-columns:repeat(3,1fr)}.wide-note{grid-column:auto}.wrap{padding-left:24px;padding-right:24px}}
+@media(min-width:600px){.board{grid-template-columns:repeat(3,minmax(0,1fr))}.planner-grid{grid-template-columns:repeat(3,1fr)}.wide-note{grid-column:auto}.wrap{padding-left:24px;padding-right:24px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
