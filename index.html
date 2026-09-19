@@ -87,8 +87,10 @@ function addPublicDream(d,i){
   if(d.story){const story=document.createElement('div');story.className='story';story.textContent=d.story;polaroid.appendChild(story)}
   polaroid.addEventListener('click',()=>polaroid.classList.toggle('open'));article.append(tape,polaroid);board.prepend(article);
 }
-db.collection('publicDreams').where('status','==','manifesting').get().then(snap=>{
-  snap.docs.sort((a,b)=>{const at=a.data().createdAt?.toMillis?.()||0,bt=b.data().createdAt?.toMillis?.()||0;return at-bt}).forEach((doc,i)=>addPublicDream(doc.data(),i));
+db.collection('publicDreams').get().then(snap=>{
+  const docs=snap.docs.filter(doc=>(doc.data().status||'manifesting')==='manifesting');
+  docs.sort((a,b)=>{const at=a.data().createdAt?.toMillis?.()||0,bt=b.data().createdAt?.toMillis?.()||0;return at-bt}).forEach((doc,i)=>addPublicDream(doc.data(),i));
+  console.log('Dreamora public dreams loaded:',docs.length);
 }).catch(err=>console.error('Could not load public dreams',err));
 </script>
 </body></html>
