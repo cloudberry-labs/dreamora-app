@@ -40,6 +40,15 @@ h1{font:400 clamp(46px,15vw,76px)/.9 "Darumadrop One",sans-serif;margin:9px 0 7p
 footer{text-align:center;font-size:10px;opacity:.55;margin-top:28px}
 @keyframes arrive{from{opacity:0;transform:translateY(12px) rotate(var(--r))}to{opacity:1;transform:translateY(0) rotate(var(--r))}}
 @media(min-width:600px){.board{grid-template-columns:repeat(3,minmax(0,1fr))}.planner-grid{grid-template-columns:repeat(3,1fr)}.wide-note{grid-column:auto}.wrap{padding-left:24px;padding-right:24px}}
+body.style-clean{font-family:Quicksand,sans-serif}body.style-clean h1,body.style-clean .section-title,body.style-clean .caption,body.style-clean .paper-card h3,body.style-clean .story,body.style-clean .count,body.style-clean .sticky,body.style-clean .dream-note .caption{font-family:Quicksand,sans-serif;font-weight:700}
+body.paper-plain{background-size:auto,auto,auto!important}
+body.theme-pink{--paper:#fffafd;--sticky:#f8dfea;--pin:#eaa1bf;background:radial-gradient(circle at 10% 5%,#ffd9e8 0,transparent 28%),radial-gradient(circle at 88% 15%,#fff0f6 0,transparent 28%),radial-gradient(circle at 55% 62%,#f5d8e8 0,transparent 25%),radial-gradient(#e9cbd7 1px,transparent 1px),#fff7fa}
+body.theme-clouds{--paper:#fbfdff;--sticky:#e8e6fb;--pin:#9bd8f7;background:radial-gradient(circle at 10% 8%,#d8f2ff 0,transparent 30%),radial-gradient(circle at 88% 18%,#e4e8ff 0,transparent 30%),radial-gradient(circle at 55% 62%,#eee4ff 0,transparent 26%),radial-gradient(#ccddea 1px,transparent 1px),#f7fbff}
+body.theme-vintage{--paper:#fffaf0;--sticky:#ead8bd;--pin:#c9a77a;background:radial-gradient(circle at 15% 8%,#ead9bd 0,transparent 28%),radial-gradient(circle at 85% 20%,#f5e8cf 0,transparent 30%),radial-gradient(#d8c8ae 1px,transparent 1px),#f7efdf}
+body.theme-cottage{--paper:#fffdf5;--sticky:#dfead8;--pin:#b8cfb1;background:radial-gradient(circle at 12% 8%,#dcebd5 0,transparent 28%),radial-gradient(circle at 88% 18%,#f7e2d8 0,transparent 28%),radial-gradient(circle at 55% 62%,#fff0d6 0,transparent 25%),radial-gradient(#d5dccb 1px,transparent 1px),#fbf8ed}
+body.theme-night{--ink:#f7f1ff;--paper:#5d587d;--sticky:#8079a7;--pin:#eaa1bf;color:#f7f1ff;background:radial-gradient(circle at 12% 8%,#7d739d 0,transparent 28%),radial-gradient(circle at 88% 18%,#8c6f91 0,transparent 28%),radial-gradient(circle at 55% 62%,#514d70 0,transparent 25%),radial-gradient(#ffffff20 1px,transparent 1px),#3f3b59}
+body.theme-night .polaroid,body.theme-night .paper-card,body.theme-night .dream-note{color:#565169}body.theme-night .section-title:after{opacity:.7}
+body.theme-cream{--paper:#fffdf8;--sticky:#f5eee4;--pin:#d7c4ae;background:radial-gradient(circle at 12% 8%,#f4eadc 0,transparent 26%),radial-gradient(circle at 88% 18%,#fffaf0 0,transparent 28%),radial-gradient(#ddd4c8 1px,transparent 1px),#fffaf2}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
@@ -64,6 +73,18 @@ document.querySelectorAll('.polaroid').forEach(p=>p.addEventListener('click',()=
 const firebaseConfig={apiKey:"AIzaSyCPdqqY0lWn58YczzavjsF08dYIhM6-O5I",authDomain:"dreamora-app.firebaseapp.com",projectId:"dreamora-app",storageBucket:"dreamora-app.firebasestorage.app",messagingSenderId:"609829561350",appId:"1:609829561350:web:ac8f053ceb5f00f9808f87",measurementId:"G-PQYM9PG393"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
+const styleThemes=['pink','clouds','vintage','cottage','night','cream'];
+function applyPublicStyle(style={}){
+  document.body.classList.remove(...styleThemes.map(x=>'theme-'+x),'paper-plain','style-clean');
+  document.body.classList.add('theme-'+(style.theme||'pink'));
+  if((style.paper||'dots')==='plain')document.body.classList.add('paper-plain');
+  if((style.font||'cute')==='clean')document.body.classList.add('style-clean');
+}
+async function loadPublicStyle(ownerUid){
+  if(!ownerUid)return;
+  try{const d=await db.collection('publicStyles').doc(ownerUid).get();if(d.exists)applyPublicStyle(d.data())}
+  catch(e){console.warn('Could not load Dreamora public style',e)}
+}
 function dreamoraToggleKey(kind,key){return 'dreamora_'+kind+'_'+key}
 function bindLocalChecks(){
  document.querySelectorAll('#publicTodoList .check').forEach((row,i)=>{const box=row.querySelector('.box');if(!box)return;const key=dreamoraToggleKey('todo',row.dataset.id||i);if(localStorage.getItem(key)==='1')row.classList.add('done');box.onclick=()=>{row.classList.toggle('done');localStorage.setItem(key,row.classList.contains('done')?'1':'0')}});
@@ -101,7 +122,7 @@ async function loadPublicTodos(ownerUid){
 }
 db.collection('publicDreams').get().then(snap=>{
   const all=[...snap.docs].sort((a,b)=>{const ad=a.data(),bd=b.data();if(Number.isFinite(ad.order)||Number.isFinite(bd.order))return (ad.order??9999)-(bd.order??9999);return (ad.createdAt?.toMillis?.()||0)-(bd.createdAt?.toMillis?.()||0)});
-  const active=all.filter(doc=>(doc.data().status||'manifesting')==='manifesting'),done=all.filter(doc=>doc.data().status==='manifested');const ownerUid=all.find(doc=>doc.data().ownerUid)?.data().ownerUid||'';loadPublicTodos(ownerUid);loadPublicTools(ownerUid);
+  const active=all.filter(doc=>(doc.data().status||'manifesting')==='manifesting'),done=all.filter(doc=>doc.data().status==='manifested');const ownerUid=all.find(doc=>doc.data().ownerUid)?.data().ownerUid||'';loadPublicTodos(ownerUid);loadPublicTools(ownerUid);loadPublicStyle(ownerUid);
   active.forEach((doc,i)=>addPublicDream(doc.data(),i,board,false));
   done.forEach((doc,i)=>addPublicDream(doc.data(),i,manifestedBoard,true));
   manifestedCount.textContent='✨ '+done.length+' dream'+(done.length===1?'':'s')+' manifested';
