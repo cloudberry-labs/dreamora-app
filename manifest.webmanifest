@@ -1,0 +1,18 @@
+{
+  "name": "Dreamora Studio",
+  "short_name": "Dreamora",
+  "description": "Your private Dreamora Studio",
+  "start_url": "/studio.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fdf8f1",
+  "theme_color": "#fdf8f1",
+  "icons": [
+    {
+      "src": "/ChatGPT%20Image%20Sep%2020,%202026%20at%2004_42_31%20AM.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
