@@ -10,5 +10,5 @@ firebase.initializeApp({apiKey:"AIzaSyCPdqqY0lWn58YczzavjsF08dYIhM6-O5I",authDom
 const db=firebase.firestore(),params=new URLSearchParams(location.search),tag=(params.get('tag')||'').trim();
 function go(mode){const q=new URLSearchParams();q.set('mode',mode);if(tag)q.set('tag',tag);location.href='login.html?'+q.toString()}
 document.getElementById('activate').onclick=()=>go('signup');document.getElementById('login').onclick=()=>go('login');
-(async()=>{if(!tag)return;try{const snap=await db.collection('publicTags').doc(tag).get();if(snap.exists){const d=snap.data();if(d.status==='claimed'&&d.boardSlug)location.replace('./?b='+encodeURIComponent(d.boardSlug))}}catch(e){console.warn('Could not resolve Dreamora tag',e)}})();
+(async()=>{if(!tag)return;try{const response=await fetch('/api/resolve-tag?tag='+encodeURIComponent(tag)),d=await response.json();if(response.ok&&d.status==='claimed'&&d.boardSlug){location.replace('./?b='+encodeURIComponent(d.boardSlug));return}if(!response.ok||!d.valid){document.getElementById('activate').disabled=true;document.getElementById('activate').textContent='INVALID DREAMORA TAG';document.getElementById('login').style.display='none'}}catch(e){console.warn('Could not resolve Dreamora tag',e)}})();
 </script></body></html>
