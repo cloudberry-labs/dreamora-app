@@ -100,7 +100,7 @@ function addPublicDream(d,i,target=board,isManifested=false){
   const article=document.createElement('article');article.className='dream';article.style.setProperty('--r',((i%5)-2)*.7+'deg');article.style.setProperty('--d',(i*.04)+'s');
   const tape=document.createElement('div');tape.className='tape';tape.style.setProperty('--t',i%2?'3deg':'-3deg');tape.style.setProperty('--tape',i%3===0?'#eaa1bf99':i%3===1?'#9bd8f799':'#f5dfa0bb');
   const card=document.createElement('div');
-  card.className=d.photoUrl?'polaroid':'dream-note';if(d.photoUrl&&d.paperColor&&polaroidColors[d.paperColor])card.style.background=polaroidColors[d.paperColor];
+  card.className=d.photoUrl?'polaroid':'dream-note';const savedPolaroidColor=d.polaroidColor||d.paperColor;if(d.photoUrl&&savedPolaroidColor&&polaroidColors[savedPolaroidColor])card.style.background=polaroidColors[savedPolaroidColor];
   if(!d.photoUrl)card.style.setProperty('--sticky',i%4===0?'#dfead8':i%4===1?'#eee5fa':i%4===2?'#f9dfd0':'#f8eebd');
   if(d.photoUrl){const img=document.createElement('img');img.className='photo';img.src=d.photoUrl;img.loading=i<3?'eager':'lazy';img.fetchPriority=i<2?'high':'auto';img.decoding='async';img.alt=d.title||'Dream';img.addEventListener('error',()=>{console.warn('Dreamora image failed to load',d.photoUrl)});card.appendChild(img)}
   const title=document.createElement('div');title.className='caption';title.textContent=d.title||'Untitled dream';card.appendChild(title);
