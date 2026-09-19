@@ -50,7 +50,7 @@ footer{text-align:center;font-size:10px;opacity:.55;margin-top:28px}
 <header><span class="kicker">a little place for big dreams ✨</span><h1>Dreamora ♡</h1><div class="tagline">DREAM IT • PIN IT • LIVE IT</div></header>
 <section><h2 class="section-title">✨ Now Manifesting</h2><div class="board" id="manifestingBoard"></div></section>
 <section><h2 class="section-title">🎀 Dream &amp; Do</h2><div class="planner-grid">
-<div class="paper-card" style="--r:-1deg"><div class="tape" style="--t:-3deg;--tape:#eaa1bf88"></div><h3>♡ Dream To-Do</h3><div class="check done"><span class="box"></span><span>Write down the dream</span></div><div class="check"><span class="box"></span><span>Take one tiny step</span></div><div class="check"><span class="box"></span><span>Work on my creative project</span></div><div class="check"><span class="box"></span><span>Celebrate progress ✨</span></div></div>
+<div class="paper-card" id="publicTodoCard" style="--r:-1deg"><div class="tape" style="--t:-3deg;--tape:#eaa1bf88"></div><h3>♡ Dream To-Do</h3><div id="publicTodoList"><div class="check"><span class="box"></span><span>Add your first little step ✨</span></div></div></div>
 <div class="paper-card focus" style="--r:1.5deg"><h3>✨ This Month's Focus</h3><div class="check"><span>01.</span><span>Create with intention</span></div><div class="check"><span>02.</span><span>Save for a big dream</span></div><div class="check"><span>03.</span><span>Make time for little joys</span></div></div>
 <div class="paper-card mini-week" style="--r:-1deg"><h3>☁ Little Planner</h3><div style="font-size:10px">a soft plan for the week</div><div class="days"><div class="day">M<strong>♡</strong></div><div class="day">T<strong>•</strong></div><div class="day">W<strong>☆</strong></div><div class="day">T<strong>•</strong></div><div class="day">F<strong>♡</strong></div><div class="day">S<strong>☆</strong></div><div class="day">S<strong>☁</strong></div></div></div>
 <div class="paper-card habit" style="--r:1deg"><h3>🌿 Little Habits</h3><div class="habit-row"><span>Create</span><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot on"></i><i class="dot"></i></div><div class="habit-row"><span>Read</span><i class="dot on"></i><i class="dot"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i></div><div class="habit-row"><span>Move</span><i class="dot"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot on"></i></div><div class="habit-row"><span>Save</span><i class="dot on"></i><i class="dot on"></i><i class="dot on"></i><i class="dot"></i><i class="dot"></i></div></div>
@@ -79,9 +79,20 @@ function addPublicDream(d,i,target=board,isManifested=false){
   if(isManifested){const stamp=document.createElement('span');stamp.className='stamp';stamp.textContent='Manifested ♡';card.appendChild(stamp);if(d.manifestedAt?.toDate){const date=document.createElement('div');date.className='note';date.textContent=d.manifestedAt.toDate().toLocaleDateString(undefined,{month:'long',year:'numeric'});card.appendChild(date)}}
   article.append(tape,card);target.appendChild(article);
 }
+function renderPublicTodos(docs){
+  const box=document.getElementById('publicTodoList');if(!box)return;
+  box.innerHTML='';
+  if(!docs.length){box.innerHTML='<div class="check"><span class="box"></span><span>Add your first little step ✨</span></div>';return}
+  docs.slice(0,6).forEach(doc=>{const d=doc.data();const row=document.createElement('div');row.className='check'+(d.done?' done':'');const mark=document.createElement('span');mark.className='box';const text=document.createElement('span');text.textContent=d.text||'';if(d.dreamTitle){const small=document.createElement('small');small.style.cssText='display:block;font:600 10px Caveat;color:#9c6682';small.textContent='for ♡ '+d.dreamTitle;text.appendChild(small)}row.append(mark,text);box.appendChild(row)})
+}
+async function loadPublicTodos(ownerUid){
+  if(!ownerUid)return;
+  try{const snap=await db.collection('users').doc(ownerUid).collection('todos').orderBy('createdAt','desc').get();renderPublicTodos([...snap.docs])}
+  catch(e){console.warn('Could not load Dream To-Do on public board',e)}
+}
 db.collection('publicDreams').get().then(snap=>{
   const all=[...snap.docs].sort((a,b)=>{const ad=a.data(),bd=b.data();if(Number.isFinite(ad.order)||Number.isFinite(bd.order))return (ad.order??9999)-(bd.order??9999);return (ad.createdAt?.toMillis?.()||0)-(bd.createdAt?.toMillis?.()||0)});
-  const active=all.filter(doc=>(doc.data().status||'manifesting')==='manifesting'),done=all.filter(doc=>doc.data().status==='manifested');
+  const active=all.filter(doc=>(doc.data().status||'manifesting')==='manifesting'),done=all.filter(doc=>doc.data().status==='manifested');const ownerUid=all.find(doc=>doc.data().ownerUid)?.data().ownerUid||'';loadPublicTodos(ownerUid);
   active.forEach((doc,i)=>addPublicDream(doc.data(),i,board,false));
   done.forEach((doc,i)=>addPublicDream(doc.data(),i,manifestedBoard,true));
   manifestedCount.textContent='✨ '+done.length+' dream'+(done.length===1?'':'s')+' manifested';
