@@ -42,7 +42,7 @@ footer{text-align:center;font-size:10px;opacity:.55;margin-top:28px}
 @keyframes arrive{from{opacity:0;transform:translateY(12px) rotate(var(--r))}to{opacity:1;transform:translateY(0) rotate(var(--r))}}
 @media(min-width:600px){.board{grid-template-columns:repeat(3,minmax(0,1fr))}.planner-grid{grid-template-columns:repeat(3,1fr)}.wide-note{grid-column:auto}.wrap{padding-left:24px;padding-right:24px}}
 body.style-clean{font-family:Quicksand,sans-serif}body.style-clean h1,body.style-clean .section-title,body.style-clean .caption,body.style-clean .paper-card h3,body.style-clean .story,body.style-clean .count,body.style-clean .sticky,body.style-clean .dream-note .caption{font-family:Quicksand,sans-serif;font-weight:700}
-body.paper-plain{background-image:none!important;background-size:auto!important}
+body.paper-plain{background-image:none!important;background-size:auto!important}body:not(.paper-plain){background-size:auto,auto,auto,18px 18px!important}
 body.theme-pink{--paper:#fffafd;--sticky:#f8dfea;--pin:#eaa1bf;background:radial-gradient(circle at 10% 5%,#ffd9e8 0,transparent 28%),radial-gradient(circle at 88% 15%,#fff0f6 0,transparent 28%),radial-gradient(circle at 55% 62%,#f5d8e8 0,transparent 25%),radial-gradient(#e9cbd7 1px,transparent 1px),#fff7fa}
 body.theme-clouds{--paper:#fbfdff;--sticky:#e8e6fb;--pin:#9bd8f7;background:radial-gradient(circle at 10% 8%,#d8f2ff 0,transparent 30%),radial-gradient(circle at 88% 18%,#e4e8ff 0,transparent 30%),radial-gradient(circle at 55% 62%,#eee4ff 0,transparent 26%),radial-gradient(#ccddea 1px,transparent 1px),#f7fbff}
 body.theme-vintage{--paper:#fffaf0;--sticky:#ead8bd;--pin:#c9a77a;background:radial-gradient(circle at 15% 8%,#ead9bd 0,transparent 28%),radial-gradient(circle at 85% 20%,#f5e8cf 0,transparent 30%),radial-gradient(#d8c8ae 1px,transparent 1px),#f7efdf}
@@ -76,11 +76,11 @@ const firebaseConfig={apiKey:"AIzaSyCPdqqY0lWn58YczzavjsF08dYIhM6-O5I",authDomai
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 const styleThemes=['pink','clouds','vintage','cottage','night','cream'];
-function applyPublicStyle(style={}){
+const polaroidColors={cream:'#fffdf8',blush:'#fde8ef',blue:'#e6f4fb',lavender:'#eee8fa',sage:'#e5f0df',peach:'#fae5d8'};const cardColors={pink:'#f8dfe9',blue:'#e5f3fa',lavender:'#eee5fa',sage:'#e4f0df',yellow:'#f8eebd'};function applyPublicStyle(style={}){
   document.body.classList.remove(...styleThemes.map(x=>'theme-'+x),'paper-plain','style-clean');
   document.body.classList.add('theme-'+(style.theme||'pink'));document.getElementById('publicTodoCard')?.classList.toggle('dark-paper',(style.theme||'pink')==='night');
   if((style.paper||'dots')==='plain'){document.body.classList.add('paper-plain')}else{document.body.style.backgroundSize='auto,auto,auto,18px 18px'}
-  if((style.font||'cute')==='clean')document.body.classList.add('style-clean');
+  if((style.font||'cute')==='clean')document.body.classList.add('style-clean');document.documentElement.style.setProperty('--user-polaroid',polaroidColors[style.polaroidColor]||'var(--paper)');document.querySelectorAll('.polaroid').forEach(x=>x.style.background='var(--user-polaroid)');if(style.cardColor&&style.cardColor!=='auto'){const col=cardColors[style.cardColor];document.querySelectorAll('.paper-card,.dream-note').forEach(x=>x.style.background=col)}
   requestAnimationFrame(refreshSurfaceContrast);
 }
 async function loadPublicStyle(ownerUid){
@@ -100,7 +100,7 @@ function addPublicDream(d,i,target=board,isManifested=false){
   const article=document.createElement('article');article.className='dream';article.style.setProperty('--r',((i%5)-2)*.7+'deg');article.style.setProperty('--d',(i*.04)+'s');
   const tape=document.createElement('div');tape.className='tape';tape.style.setProperty('--t',i%2?'3deg':'-3deg');tape.style.setProperty('--tape',i%3===0?'#eaa1bf99':i%3===1?'#9bd8f799':'#f5dfa0bb');
   const card=document.createElement('div');
-  card.className=d.photoUrl?'polaroid':'dream-note';
+  card.className=d.photoUrl?'polaroid':'dream-note';if(d.photoUrl)card.style.background='var(--user-polaroid,var(--paper))';
   if(!d.photoUrl)card.style.setProperty('--sticky',i%4===0?'#dfead8':i%4===1?'#eee5fa':i%4===2?'#f9dfd0':'#f8eebd');
   if(d.photoUrl){const img=document.createElement('img');img.className='photo';img.src=d.photoUrl;img.loading=i<3?'eager':'lazy';img.fetchPriority=i<2?'high':'auto';img.decoding='async';img.alt=d.title||'Dream';img.addEventListener('error',()=>{console.warn('Dreamora image failed to load',d.photoUrl)});card.appendChild(img)}
   const title=document.createElement('div');title.className='caption';title.textContent=d.title||'Untitled dream';card.appendChild(title);
