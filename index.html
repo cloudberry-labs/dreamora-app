@@ -33,7 +33,7 @@ h1{font:400 clamp(46px,15vw,76px)/.9 "Darumadrop One",sans-serif;margin:9px 0 7p
 .tape{position:absolute;width:50px;height:15px;top:-7px;left:50%;transform:translateX(-50%) rotate(var(--t));opacity:.82;z-index:2;background:var(--tape);box-shadow:0 1px 2px #0001}.dream>.tape{top:1px}.polaroid+.tape{top:auto;bottom:1px}
 .pin{position:absolute;right:8px;top:-7px;width:13px;height:13px;border-radius:50%;background:var(--pin);box-shadow:1px 2px 3px #0003;z-index:2}
 .sticky{padding:17px 12px 14px;background:var(--sticky);box-shadow:0 7px 13px #584d5c18;font:600 20px/1.05 Caveat,cursive;text-align:center;min-height:105px;display:grid;place-items:center}
-.sticky:after{content:"♡";position:absolute;right:8px;bottom:3px;font-size:20px;opacity:.35}
+.sticky:after{content:"♡";position:absolute;right:8px;bottom:3px;font-size:20px;opacity:.35}.dream-note{padding:20px 14px 17px;background:var(--sticky,#eee5fa);box-shadow:0 7px 13px #584d5c18;border:1px solid #56516910;min-height:120px;display:flex;flex-direction:column;justify-content:center;text-align:center}.dream-note .caption{margin:0;font-size:23px}.dream-note .note{font-size:11px}.dream-note .story{text-align:center;border-top:1px dashed #ffffffaa}
 .manifested .polaroid{filter:saturate(.86)}
 .stamp{position:absolute;right:4px;bottom:39px;border:2px solid #9a6b87;color:#9a6b87;padding:2px 5px;font:700 10px/1 Quicksand;transform:rotate(-8deg);background:#fff9;text-transform:uppercase;letter-spacing:.05em}
 .count{text-align:center;margin:24px auto 0;font:600 20px Caveat,cursive;background:#fff8;border:1px dashed #d7c8d0;border-radius:999px;padding:8px 16px;width:max-content;max-width:100%}
@@ -48,14 +48,7 @@ footer{text-align:center;font-size:10px;opacity:.55;margin-top:28px}
 <body>
 <main class="wrap">
 <header><span class="kicker">a little place for big dreams ✨</span><h1>Dreamora ♡</h1><div class="tagline">DREAM IT • PIN IT • LIVE IT</div></header>
-<section><h2 class="section-title">✨ Now Manifesting</h2><div class="board" id="manifestingBoard">
-<article class="dream" style="--r:-2deg;--d:.05s"><div class="tape" style="--t:3deg;--tape:#eaa1bf99"></div><div class="polaroid"><img class="photo" src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=80" alt="Dream destination"><div class="caption">More beautiful adventures</div><div class="note">places that make my heart feel alive ♡</div><div class="story">One day I want to look back at this photo and remember when this was still only a dream pinned on my board.</div></div></article>
-<article class="dream" style="--r:2.5deg;--d:.1s;--sticky:#dfead8"><div class="sticky">I am building a life that feels as good as it looks. ✨</div></article>
-<article class="dream" style="--r:1deg;--d:.15s"><span class="pin" style="--pin:#9bd8f7"></span><div class="polaroid"><img class="photo" src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=650&q=80" alt="Creative workspace"><div class="caption">Dream creative studio</div><div class="story">A soft little space where ideas become real, music plays in the background, and creating feels easy.</div></div></article>
-<article class="dream" style="--r:-3deg;--d:.2s"><div class="tape" style="--t:-5deg;--tape:#f5b58faa"></div><div class="polaroid"><img class="photo" src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80" alt="Dream home"><div class="caption">Our cozy home</div><div class="note">warm, peaceful, ours 🏡</div><div class="story">Not just a house — a calm place filled with tiny routines, good food, laughter and things we chose together.</div></div></article>
-<article class="dream" style="--r:2deg;--d:.25s;--sticky:#eee5fa"><div class="sticky">Dream bigger.<br>Then make it real. 🎀</div></article>
-<article class="dream" style="--r:-1deg;--d:.3s"><div class="tape" style="--t:4deg;--tape:#f5dfa0bb"></div><div class="polaroid"><img class="photo" src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80" alt="Live music"><div class="caption">More stages, more music</div><div class="story">More nights doing what I love, more places, more songs, and memories worth keeping.</div></div></article>
-</div></section>
+<section><h2 class="section-title">✨ Now Manifesting</h2><div class="board" id="manifestingBoard"></div></section>
 <section><h2 class="section-title">🎀 Dream &amp; Do</h2><div class="planner-grid">
 <div class="paper-card" style="--r:-1deg"><div class="tape" style="--t:-3deg;--tape:#eaa1bf88"></div><h3>♡ Dream To-Do</h3><div class="check done"><span class="box"></span><span>Write down the dream</span></div><div class="check"><span class="box"></span><span>Take one tiny step</span></div><div class="check"><span class="box"></span><span>Work on my creative project</span></div><div class="check"><span class="box"></span><span>Celebrate progress ✨</span></div></div>
 <div class="paper-card focus" style="--r:1.5deg"><h3>✨ This Month's Focus</h3><div class="check"><span>01.</span><span>Create with intention</span></div><div class="check"><span>02.</span><span>Save for a big dream</span></div><div class="check"><span>03.</span><span>Make time for little joys</span></div></div>
@@ -79,13 +72,15 @@ const board=document.getElementById('manifestingBoard');
 function addPublicDream(d,i){
   const article=document.createElement('article');article.className='dream';article.style.setProperty('--r',((i%5)-2)*.7+'deg');article.style.setProperty('--d',(i*.04)+'s');
   const tape=document.createElement('div');tape.className='tape';tape.style.setProperty('--t',i%2?'3deg':'-3deg');tape.style.setProperty('--tape',i%3===0?'#eaa1bf99':i%3===1?'#9bd8f799':'#f5dfa0bb');
-  const polaroid=document.createElement('div');polaroid.className='polaroid';
-  const img=document.createElement('img');img.className='photo';img.src=d.photoUrl||'';img.alt=d.title||'Dream';
-  const title=document.createElement('div');title.className='caption';title.textContent=d.title||'Untitled dream';
-  polaroid.append(img,title);
-  if(d.caption){const note=document.createElement('div');note.className='note';note.textContent=d.caption;polaroid.appendChild(note)}
-  if(d.story){const story=document.createElement('div');story.className='story';story.textContent=d.story;polaroid.appendChild(story)}
-  polaroid.addEventListener('click',()=>polaroid.classList.toggle('open'));article.append(tape,polaroid);board.prepend(article);
+  const card=document.createElement('div');
+  card.className=d.photoUrl?'polaroid':'dream-note';
+  if(!d.photoUrl)card.style.setProperty('--sticky',i%4===0?'#dfead8':i%4===1?'#eee5fa':i%4===2?'#f9dfd0':'#f8eebd');
+  if(d.photoUrl){const img=document.createElement('img');img.className='photo';img.src=d.photoUrl;img.alt=d.title||'Dream';card.appendChild(img)}
+  const title=document.createElement('div');title.className='caption';title.textContent=d.title||'Untitled dream';card.appendChild(title);
+  if(d.caption){const note=document.createElement('div');note.className='note';note.textContent=d.caption;card.appendChild(note)}
+  if(d.story){const story=document.createElement('div');story.className='story';story.textContent=d.story;card.appendChild(story)}
+  if(d.photoUrl)card.addEventListener('click',()=>card.classList.toggle('open'));
+  article.append(tape,card);board.appendChild(article);
 }
 db.collection('publicDreams').get().then(snap=>{
   const docs=snap.docs.filter(doc=>(doc.data().status||'manifesting')==='manifesting');
