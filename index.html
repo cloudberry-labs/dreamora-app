@@ -80,7 +80,7 @@ const polaroidColors={cream:'#fffdf8',blush:'#fde8ef',blue:'#e6f4fb',lavender:'#
   document.body.classList.remove(...styleThemes.map(x=>'theme-'+x),'paper-plain','style-clean');
   document.body.classList.add('theme-'+(style.theme||'pink'));document.getElementById('publicTodoCard')?.classList.toggle('dark-paper',(style.theme||'pink')==='night');
   if((style.paper||'dots')==='plain'){document.body.classList.add('paper-plain')}else{document.body.style.backgroundSize='auto,auto,auto,18px 18px'}
-  if((style.font||'cute')==='clean')document.body.classList.add('style-clean');document.documentElement.style.setProperty('--user-polaroid',polaroidColors[style.polaroidColor]||'var(--paper)');document.querySelectorAll('.polaroid').forEach(x=>x.style.background='var(--user-polaroid)');if(style.cardColor&&style.cardColor!=='auto'){const col=cardColors[style.cardColor];document.querySelectorAll('.paper-card,.dream-note').forEach(x=>x.style.background=col)}
+  if((style.font||'cute')==='clean')document.body.classList.add('style-clean');
   requestAnimationFrame(refreshSurfaceContrast);
 }
 async function loadPublicStyle(ownerUid){
@@ -89,7 +89,7 @@ async function loadPublicStyle(ownerUid){
   catch(e){console.warn('Could not load Dreamora public style',e)}
 }
 function getSurfaceColor(el){const bg=getComputedStyle(el).backgroundColor;const m=bg.match(/[\d.]+/g);if(!m||m.length<3)return;const r=+m[0],g=+m[1],b=+m[2],a=m.length>3?+m[3]:1;if(a===0)return;const lum=(0.2126*r+0.7152*g+0.0722*b)/255;el.classList.toggle('surface-dark',lum<.52);el.classList.toggle('surface-light',lum>=.52)}
-function refreshSurfaceContrast(){document.querySelectorAll('.polaroid,.paper-card,.dream-note,.sticky').forEach(getSurfaceColor)}
+function refreshSurfaceContrast(){document.querySelectorAll('.polaroid,.paper-card,.dream-note,.sticky').forEach(getSurfaceColor)}function applyToolPaper(el,d){if(!el||!d)return;if(d.paperColor&&d.paperColor!=='auto'&&cardColors[d.paperColor])el.style.background=cardColors[d.paperColor];getSurfaceColor(el)}
 function dreamoraToggleKey(kind,key){return 'dreamora_'+kind+'_'+key}
 function bindLocalChecks(){
  document.querySelectorAll('#publicTodoList .check').forEach((row,i)=>{const box=row.querySelector('.box');if(!box)return;const key=dreamoraToggleKey('todo',row.dataset.id||i);if(localStorage.getItem(key)==='1')row.classList.add('done');box.onclick=()=>{row.classList.toggle('done');localStorage.setItem(key,row.classList.contains('done')?'1':'0')}});
@@ -100,7 +100,7 @@ function addPublicDream(d,i,target=board,isManifested=false){
   const article=document.createElement('article');article.className='dream';article.style.setProperty('--r',((i%5)-2)*.7+'deg');article.style.setProperty('--d',(i*.04)+'s');
   const tape=document.createElement('div');tape.className='tape';tape.style.setProperty('--t',i%2?'3deg':'-3deg');tape.style.setProperty('--tape',i%3===0?'#eaa1bf99':i%3===1?'#9bd8f799':'#f5dfa0bb');
   const card=document.createElement('div');
-  card.className=d.photoUrl?'polaroid':'dream-note';if(d.photoUrl)card.style.background='var(--user-polaroid,var(--paper))';
+  card.className=d.photoUrl?'polaroid':'dream-note';if(d.photoUrl&&d.paperColor&&polaroidColors[d.paperColor])card.style.background=polaroidColors[d.paperColor];
   if(!d.photoUrl)card.style.setProperty('--sticky',i%4===0?'#dfead8':i%4===1?'#eee5fa':i%4===2?'#f9dfd0':'#f8eebd');
   if(d.photoUrl){const img=document.createElement('img');img.className='photo';img.src=d.photoUrl;img.loading=i<3?'eager':'lazy';img.fetchPriority=i<2?'high':'auto';img.decoding='async';img.alt=d.title||'Dream';img.addEventListener('error',()=>{console.warn('Dreamora image failed to load',d.photoUrl)});card.appendChild(img)}
   const title=document.createElement('div');title.className='caption';title.textContent=d.title||'Untitled dream';card.appendChild(title);
