@@ -68,8 +68,8 @@ document.querySelectorAll('.polaroid').forEach(p=>p.addEventListener('click',()=
 const firebaseConfig={apiKey:"AIzaSyCPdqqY0lWn58YczzavjsF08dYIhM6-O5I",authDomain:"dreamora-app.firebaseapp.com",projectId:"dreamora-app",storageBucket:"dreamora-app.firebasestorage.app",messagingSenderId:"609829561350",appId:"1:609829561350:web:ac8f053ceb5f00f9808f87",measurementId:"G-PQYM9PG393"};
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
-const board=document.getElementById('manifestingBoard');
-function addPublicDream(d,i){
+const board=document.getElementById('manifestingBoard');const manifestedBoard=document.getElementById('manifestedBoard'),manifestedCount=document.getElementById('manifestedCount');
+function addPublicDream(d,i,target=board,isManifested=false){
   const article=document.createElement('article');article.className='dream';article.style.setProperty('--r',((i%5)-2)*.7+'deg');article.style.setProperty('--d',(i*.04)+'s');
   const tape=document.createElement('div');tape.className='tape';tape.style.setProperty('--t',i%2?'3deg':'-3deg');tape.style.setProperty('--tape',i%3===0?'#eaa1bf99':i%3===1?'#9bd8f799':'#f5dfa0bb');
   const card=document.createElement('div');
@@ -80,12 +80,17 @@ function addPublicDream(d,i){
   if(d.caption){const note=document.createElement('div');note.className='note';note.textContent=d.caption;card.appendChild(note)}
   if(d.story){const story=document.createElement('div');story.className='story';story.textContent=d.story;card.appendChild(story)}
   if(d.photoUrl)card.addEventListener('click',()=>card.classList.toggle('open'));
-  article.append(tape,card);board.appendChild(article);
+  if(isManifested){const stamp=document.createElement('span');stamp.className='stamp';stamp.textContent='Manifested ♡';card.appendChild(stamp);if(d.manifestedAt?.toDate){const date=document.createElement('div');date.className='note';date.textContent=d.manifestedAt.toDate().toLocaleDateString(undefined,{month:'long',year:'numeric'});card.appendChild(date)}}
+  article.append(tape,card);target.appendChild(article);
 }
 db.collection('publicDreams').get().then(snap=>{
-  const docs=snap.docs.filter(doc=>(doc.data().status||'manifesting')==='manifesting');
-  docs.sort((a,b)=>{const at=a.data().createdAt?.toMillis?.()||0,bt=b.data().createdAt?.toMillis?.()||0;return at-bt}).forEach((doc,i)=>addPublicDream(doc.data(),i));
-  console.log('Dreamora public dreams loaded:',docs.length);
+  const all=[...snap.docs].sort((a,b)=>{const ad=a.data(),bd=b.data();if(Number.isFinite(ad.order)||Number.isFinite(bd.order))return (ad.order??9999)-(bd.order??9999);return (ad.createdAt?.toMillis?.()||0)-(bd.createdAt?.toMillis?.()||0)});
+  const active=all.filter(doc=>(doc.data().status||'manifesting')==='manifesting'),done=all.filter(doc=>doc.data().status==='manifested');
+  active.forEach((doc,i)=>addPublicDream(doc.data(),i,board,false));
+  done.forEach((doc,i)=>addPublicDream(doc.data(),i,manifestedBoard,true));
+  manifestedCount.textContent='✨ '+done.length+' dream'+(done.length===1?'':'s')+' manifested';
+  if(!done.length)manifestedCount.style.opacity='.55';
+  console.log('Dreamora public dreams loaded:',active.length,'manifesting /',done.length,'manifested');
 }).catch(err=>console.error('Could not load public dreams',err));
 </script>
 </body></html>
