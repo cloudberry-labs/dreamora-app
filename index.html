@@ -76,7 +76,7 @@ const firebaseConfig={apiKey:"AIzaSyCPdqqY0lWn58YczzavjsF08dYIhM6-O5I",authDomai
 firebase.initializeApp(firebaseConfig);
 const db=firebase.firestore();
 const styleThemes=['pink','clouds','vintage','cottage','night','cream'];
-const polaroidColors={cream:'#fffdf8',blush:'#fde8ef',blue:'#e6f4fb',lavender:'#eee8fa',sage:'#e5f0df',peach:'#fae5d8'};const cardColors={pink:'#f8dfe9',blue:'#e5f3fa',lavender:'#eee5fa',sage:'#e4f0df',yellow:'#f8eebd'};function applyPublicStyle(style={}){
+const polaroidColors={cream:'#fffdf8',blush:'#fde8ef',blue:'#e6f4fb',lavender:'#eee8fa',sage:'#e5f0df',peach:'#fae5d8'};const cardColors={cream:'#fffdf9',blush:'#fde8ef',pink:'#fde8ef',blue:'#e6f4fb',lavender:'#eee8fa',sage:'#e5f0df',peach:'#fae5d8',yellow:'#f8eebd'};function applyPublicStyle(style={}){
   document.body.classList.remove(...styleThemes.map(x=>'theme-'+x),'paper-plain','style-clean');
   document.body.classList.add('theme-'+(style.theme||'pink'));document.getElementById('publicTodoCard')?.classList.toggle('dark-paper',(style.theme||'pink')==='night');
   if((style.paper||'dots')==='plain'){document.body.classList.add('paper-plain')}else{document.body.style.backgroundSize='auto,auto,auto,18px 18px'}
