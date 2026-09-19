@@ -42,11 +42,13 @@ footer{text-align:center;font-size:10px;opacity:.55;margin-top:28px}
 @media(min-width:600px){.board{columns:3}.planner-grid{grid-template-columns:repeat(3,1fr)}.wide-note{grid-column:auto}.wrap{padding-left:24px;padding-right:24px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 </head>
 <body>
 <main class="wrap">
 <header><span class="kicker">a little place for big dreams ✨</span><h1>Dreamora ♡</h1><div class="tagline">DREAM IT • PIN IT • LIVE IT</div></header>
-<section><h2 class="section-title">✨ Now Manifesting</h2><div class="board">
+<section><h2 class="section-title">✨ Now Manifesting</h2><div class="board" id="manifestingBoard">
 <article class="dream" style="--r:-2deg;--d:.05s"><div class="tape" style="--t:3deg;--tape:#eaa1bf99"></div><div class="polaroid"><img class="photo" src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=700&q=80" alt="Dream destination"><div class="caption">More beautiful adventures</div><div class="note">places that make my heart feel alive ♡</div><div class="story">One day I want to look back at this photo and remember when this was still only a dream pinned on my board.</div></div></article>
 <article class="dream" style="--r:2.5deg;--d:.1s;--sticky:#dfead8"><div class="sticky">I am building a life that feels as good as it looks. ✨</div></article>
 <article class="dream" style="--r:1deg;--d:.15s"><span class="pin" style="--pin:#9bd8f7"></span><div class="polaroid"><img class="photo" src="https://images.unsplash.com/photo-1524758631624-e2822e304c36?auto=format&fit=crop&w=650&q=80" alt="Creative workspace"><div class="caption">Dream creative studio</div><div class="story">A soft little space where ideas become real, music plays in the background, and creating feels easy.</div></div></article>
@@ -68,5 +70,25 @@ footer{text-align:center;font-size:10px;opacity:.55;margin-top:28px}
 </div><div class="count">✨ 2 dreams manifested</div></section>
 <footer>made with dreams, tiny pins & a little bit of magic ♡</footer>
 </main>
-<script>document.querySelectorAll('.polaroid').forEach(p=>p.addEventListener('click',()=>p.classList.toggle('open')));</script>
+<script>
+document.querySelectorAll('.polaroid').forEach(p=>p.addEventListener('click',()=>p.classList.toggle('open')));
+const firebaseConfig={apiKey:"AIzaSyCPdqqY0lWn58YczzavjsF08dYIhM6-O5I",authDomain:"dreamora-app.firebaseapp.com",projectId:"dreamora-app",storageBucket:"dreamora-app.firebasestorage.app",messagingSenderId:"609829561350",appId:"1:609829561350:web:ac8f053ceb5f00f9808f87",measurementId:"G-PQYM9PG393"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.firestore();
+const board=document.getElementById('manifestingBoard');
+function addPublicDream(d,i){
+  const article=document.createElement('article');article.className='dream';article.style.setProperty('--r',((i%5)-2)*.7+'deg');article.style.setProperty('--d',(i*.04)+'s');
+  const tape=document.createElement('div');tape.className='tape';tape.style.setProperty('--t',i%2?'3deg':'-3deg');tape.style.setProperty('--tape',i%3===0?'#eaa1bf99':i%3===1?'#9bd8f799':'#f5dfa0bb');
+  const polaroid=document.createElement('div');polaroid.className='polaroid';
+  const img=document.createElement('img');img.className='photo';img.src=d.photoUrl||'';img.alt=d.title||'Dream';
+  const title=document.createElement('div');title.className='caption';title.textContent=d.title||'Untitled dream';
+  polaroid.append(img,title);
+  if(d.caption){const note=document.createElement('div');note.className='note';note.textContent=d.caption;polaroid.appendChild(note)}
+  if(d.story){const story=document.createElement('div');story.className='story';story.textContent=d.story;polaroid.appendChild(story)}
+  polaroid.addEventListener('click',()=>polaroid.classList.toggle('open'));article.append(tape,polaroid);board.prepend(article);
+}
+db.collection('publicDreams').where('status','==','manifesting').get().then(snap=>{
+  snap.docs.sort((a,b)=>{const at=a.data().createdAt?.toMillis?.()||0,bt=b.data().createdAt?.toMillis?.()||0;return at-bt}).forEach((doc,i)=>addPublicDream(doc.data(),i));
+}).catch(err=>console.error('Could not load public dreams',err));
+</script>
 </body></html>
