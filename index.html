@@ -122,7 +122,7 @@ if(tools.planner){applyToolPaper(document.getElementById('publicPlannerCard'),to
 if(tools.habits){applyToolPaper(document.getElementById('publicHabitsCard'),tools.habits);const vals=[tools.habits.one,tools.habits.two,tools.habits.three,tools.habits.four].filter(Boolean),card=document.getElementById('publicHabitsCard');if(vals.length){card.querySelectorAll('.habit-row').forEach(x=>x.remove());vals.forEach(v=>{const r=document.createElement('div');r.className='habit-row';const n=document.createElement('span');n.textContent=v;r.appendChild(n);for(let i=0;i<5;i++){const dot=document.createElement('i');dot.className='dot';r.appendChild(dot)}card.appendChild(r)});bindLocalChecks()}}}catch(e){console.warn('Could not load Dream & Do tools',e)}}
 async function loadPublicTodos(ownerUid){
   if(!ownerUid)return;
-  try{const snap=await db.collection('publicTodos').where('ownerUid','==',ownerUid).get();const docs=[...snap.docs].sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));renderPublicTodos(docs)}
+  try{const snap=await db.collection('publicTodos').where('ownerUid','==',ownerUid).get();const docs=[...snap.docs].sort((a,b)=>(b.data().createdAt?.toMillis?.()||0)-(a.data().createdAt?.toMillis?.()||0));renderPublicTodos(docs);try{const colorDoc=await db.collection('publicTools').doc(ownerUid+'_todo').get();if(colorDoc.exists)applyToolPaper(document.getElementById('publicTodoCard'),colorDoc.data())}catch(colorErr){console.warn('Could not load Dream To-Do card color',colorErr)}}
   catch(e){console.warn('Could not load Dream To-Do on public board',e)}
 }
 async function initDreamoraBoard(){
