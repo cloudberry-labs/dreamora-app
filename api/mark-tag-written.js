@@ -8,8 +8,7 @@ export default async function handler(req,res){
   const h=req.headers.authorization||'';
   if(!h.startsWith('Bearer '))return res.status(401).json({error:'Unauthorized'});
   const {auth,db}=svc(),u=await auth.verifyIdToken(h.slice(7));
-  const board=await db.collection('publicBoards').doc(u.uid).get();
-  if(!board.exists)return res.status(403).json({error:'Admin access unavailable.'});
+  if(!process.env.DREAMORA_ADMIN_UID||u.uid!==process.env.DREAMORA_ADMIN_UID)return res.status(403).json({error:'Admin access unavailable.'});
   const tag=String(req.body?.tag||'').trim().toUpperCase();
   if(!tag)return res.status(400).json({error:'Missing tag.'});
   const ref=db.collection('publicTags').doc(tag),snap=await ref.get();
