@@ -1,0 +1,19 @@
+{
+  "name": "Dreamora Admin",
+  "short_name": "Dreamora Admin",
+  "description": "Dreamora NFC Tag Studio",
+  "id": "/admin-tags.html",
+  "start_url": "/admin-tags.html",
+  "scope": "/admin-tags.html",
+  "display": "standalone",
+  "background_color": "#fdf8f1",
+  "theme_color": "#fdf8f1",
+  "icons": [
+    {
+      "src": "/ChatGPT%20Image%20Sep%2020,%202026%20at%2004_42_31%20AM.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
