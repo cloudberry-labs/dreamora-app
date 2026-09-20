@@ -129,10 +129,11 @@ async function initDreamoraBoard(){
   try{
     const params=new URLSearchParams(location.search);let requestedOwner=(params.get('board')||'').trim();const requestedSlug=(params.get('b')||'').trim();
     if(requestedSlug&&!requestedOwner){const boardSnap=await db.collection('publicBoards').where('slug','==',requestedSlug).limit(1).get();if(!boardSnap.empty)requestedOwner=boardSnap.docs[0].data().ownerUid||''}
-    const snap=requestedOwner?await db.collection('publicDreams').where('ownerUid','==',requestedOwner).get():await db.collection('publicDreams').get();
-    const all=[...snap.docs].sort((a,b)=>{const ad=a.data(),bd=b.data();if(Number.isFinite(ad.order)||Number.isFinite(bd.order))return (ad.order??9999)-(bd.order??9999);return (ad.createdAt?.toMillis?.()||0)-(bd.createdAt?.toMillis?.()||0)});
+    if(!requestedOwner){throw new Error('Dreamora board owner could not be resolved. Refusing to mix public boards.')}
+    const snap=await db.collection('publicDreams').where('ownerUid','==',requestedOwner).get();
+    const all=[...snap.docs].filter(doc=>doc.data().ownerUid===requestedOwner).sort((a,b)=>{const ad=a.data(),bd=b.data();if(Number.isFinite(ad.order)||Number.isFinite(bd.order))return (ad.order??9999)-(bd.order??9999);return (ad.createdAt?.toMillis?.()||0)-(bd.createdAt?.toMillis?.()||0)});
     const active=all.filter(doc=>(doc.data().status||'manifesting')==='manifesting'),done=all.filter(doc=>doc.data().status==='manifested');
-    const ownerUid=requestedOwner||all.find(doc=>doc.data().ownerUid)?.data().ownerUid||'';
+    const ownerUid=requestedOwner;
     if(ownerUid){
       await loadPublicStyle(ownerUid);
       const aboveFold=active.slice(0,3).map(doc=>doc.data().photoUrl).filter(Boolean);
